@@ -80,6 +80,7 @@ aQ==`,
 
     return done(null, user);
   }
+  
 );
 
 // Configurar Passport
