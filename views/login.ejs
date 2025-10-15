@@ -4,100 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kiosko - Inicio de Sesión</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .container {
-            background: white;
-            padding: 60px 80px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 1.1em;
-        }
-        
-        .login-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 18px 60px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-        
-        .login-btn:active {
-            transform: translateY(0);
-        }
-        
-        .icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-        }
-        
-        .info {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            font-size: 0.9em;
-            color: #666;
-        }
-        
-        .info strong {
-            color: #333;
-        }
-    </style>
+   <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/login.css">
 </head>
 <body>
-    <div class="container">
+    <div class="login-container">
         <div class="icon">🏢</div>
         <h1>Kiosko Corporativo</h1>
         <p class="subtitle">Sistema de Validación SAML</p>
         
-        <a href="/login" class="login-btn">
+        <a href="/login" class="btn login-btn">
             🔐 Iniciar Sesión con Workday
         </a>
         
         <div class="info">
             <strong>Nota para la demo:</strong><br>
-            Esta es una prueba de concepto usando <strong>samltest.id</strong> como IdP.<br>
+            Esta es una prueba de concepto usando <strong>SimpleSAMLphp</strong> como IdP.<br>
             Con Workday funcionará exactamente igual, solo cambiará la configuración.
         </div>
     </div>

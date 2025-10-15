@@ -14,7 +14,7 @@ interface SamlUser {
   displayName: string;
   firstName?: string;
   lastName?: string;
-  [key: string]: any; // Para cualquier otro atributo adicional
+  [key: string]: any; // Signatura de índice para compatibilidad con Passport
 }
 
 // Extender el tipo de Request de Express para incluir user tipado
@@ -60,6 +60,7 @@ const logoutCallback: VerifyWithoutRequest = (
   profile: Profile | null | undefined,
   done: VerifiedCallback
 ): void => {
+  // Convertir null a undefined para compatibilidad con Passport
   return done(null, profile || undefined);
 };
 
@@ -119,6 +120,9 @@ passport.deserializeUser((user: Express.User, done) => {
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Servir archivos estáticos (CSS, imágenes, etc.)
+app.use(express.static('public'));
 
 app.use(session({
   secret: 'kiosko-secret-key-change-in-production',
@@ -195,6 +199,7 @@ app.get('/logout', (req: Request, res: Response, next: NextFunction) => {
 // Metadata de la aplicación (útil para configurar en Workday)
 app.get('/metadata', (req: Request, res: Response) => {
   res.type('application/xml');
+  // Pasar null para los certificados si no los tienes configurados aún
   const metadata = samlStrategy.generateServiceProviderMetadata(null, null);
   res.send(metadata);
 });
