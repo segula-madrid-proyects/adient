@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import passport from 'passport';
-import { Strategy as SamlStrategy, Profile, VerifiedCallback } from '@node-saml/passport-saml';
+import { Strategy as SamlStrategy, Profile, VerifiedCallback, VerifyWithoutRequest } from '@node-saml/passport-saml';
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -14,6 +14,7 @@ interface SamlUser {
   displayName: string;
   firstName?: string;
   lastName?: string;
+  [key: string]: any; // Para cualquier otro atributo adicional
 }
 
 // Extender el tipo de Request de Express para incluir user tipado
@@ -22,6 +23,45 @@ declare global {
     interface User extends SamlUser {}
   }
 }
+
+// Función auxiliar para convertir valores del profile a string
+const getStringValue = (value: any): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value) && value.length > 0) {
+    return String(value[0]);
+  }
+  return '';
+};
+
+// Callback de verificación tipado
+const verifyCallback: VerifyWithoutRequest = (
+  profile: Profile | null | undefined,
+  done: VerifiedCallback
+): void => {
+  if (!profile) {
+    return done(new Error('No se recibió perfil del usuario'));
+  }
+
+  const user: SamlUser = {
+    id: profile.nameID || '',
+    email: getStringValue(profile.email) || profile.nameID || '',
+    displayName: getStringValue(profile.displayName) || profile.nameID || '',
+    firstName: getStringValue(profile.firstName) || undefined,
+    lastName: getStringValue(profile.lastName) || undefined
+  };
+
+  return done(null, user);
+};
+
+// Callback de logout tipado
+const logoutCallback: VerifyWithoutRequest = (
+  profile: Profile | null | undefined,
+  done: VerifiedCallback
+): void => {
+  return done(null, profile || undefined);
+};
 
 // Configuración de SAML Strategy
 const samlStrategy = new SamlStrategy(
@@ -59,28 +99,10 @@ aQ==`,
     // Opciones adicionales (DEMO - validaciones desactivadas)
     acceptedClockSkewMs: -1,
     wantAssertionsSigned: false,
-    wantAuthnResponseSigned: false,
-    validateInResponseTo: false,
-    disableRequestedAuthnContext: true,
     signatureAlgorithm: 'sha256'
   },
-  (profile: Profile | null | undefined, done: VerifiedCallback) => {
-    // Callback cuando la autenticación es exitosa
-    if (!profile) {
-      return done(new Error('No se recibió perfil del usuario'));
-    }
-
-    const user: SamlUser = {
-      id: profile.nameID || '',
-      email: profile.email || profile.nameID || '',
-      displayName: profile.displayName || profile.nameID || '',
-      firstName: profile.firstName,
-      lastName: profile.lastName
-    };
-
-    return done(null, user);
-  }
-  
+  verifyCallback,
+  logoutCallback
 );
 
 // Configurar Passport
@@ -103,7 +125,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    maxAge: 300000 // 5 minutos de inactividad para auto-logout (importante en kiosco)
+    maxAge: 300000 // 5 minutos de inactividad para auto-logout (importante en kiosko)
   }
 }));
 
@@ -173,7 +195,7 @@ app.get('/logout', (req: Request, res: Response, next: NextFunction) => {
 // Metadata de la aplicación (útil para configurar en Workday)
 app.get('/metadata', (req: Request, res: Response) => {
   res.type('application/xml');
-  const metadata = samlStrategy.generateServiceProviderMetadata();
+  const metadata = samlStrategy.generateServiceProviderMetadata(null, null);
   res.send(metadata);
 });
 
