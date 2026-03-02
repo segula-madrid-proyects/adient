@@ -74,7 +74,7 @@ const samlStrategy = new SamlStrategy(
     callbackUrl: 'http://localhost:3000/login/callback',
     
     // Identificador único de tu aplicación
-    issuer: 'kiosko-saml-demo',
+    issuer: 'portal-empleado-adient',
     
     // Certificado público del IdP (SimpleSAMLphp)
     cert: `MIIDXTCCAkWgAwIBAgIJALmVVuDWu4NYMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
