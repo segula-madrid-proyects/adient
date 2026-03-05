@@ -151,7 +151,7 @@ if (!SKIP_SAML) {
 }
 
 // URL del frontend (React/Vite)
-const CLIENT_URL = 'http://localhost:5173';
+const CLIENT_URL = 'http://localhost:5173/adient/#';
 
 if (SKIP_SAML) {
   // ── Modo desarrollo: usuario mock, sin SAML ──
