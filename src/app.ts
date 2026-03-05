@@ -3,9 +3,13 @@ import session from 'express-session';
 import passport from 'passport';
 import { Strategy as SamlStrategy, Profile, VerifiedCallback, VerifyWithoutRequest } from '@node-saml/passport-saml';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 
 const app = express();
 const PORT = 3000;
+
+// Modo desarrollo sin SAML (no requiere Docker/IdP)
+const SKIP_SAML = true;
 
 // Interfaz para el usuario autenticado
 interface SamlUser {
@@ -21,6 +25,13 @@ interface SamlUser {
 declare global {
   namespace Express {
     interface User extends SamlUser {}
+  }
+}
+
+// Extender session para modo dev (usuario mock)
+declare module 'express-session' {
+  interface SessionData {
+    user?: SamlUser;
   }
 }
 
@@ -106,103 +117,132 @@ aQ==`,
   logoutCallback
 );
 
-// Configurar Passport
-passport.use(samlStrategy);
-
-passport.serializeUser((user: Express.User, done) => {
-  done(null, user);
-});
-
-passport.deserializeUser((user: Express.User, done) => {
-  done(null, user);
-});
-
 // Middleware
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
-// Servir archivos estáticos (CSS, imágenes, etc.)
-app.use(express.static('public'));
 
 app.use(session({
   secret: 'kiosko-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
-  cookie: { 
+  cookie: {
     maxAge: 300000 // 5 minutos de inactividad para auto-logout (importante en kiosko)
   }
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
+if (!SKIP_SAML) {
+  // Configurar Passport con SAML (requiere IdP en Docker)
+  passport.use(samlStrategy);
 
-// Configurar EJS como motor de plantillas
-app.set('view engine', 'ejs');
+  passport.serializeUser((user: Express.User, done) => {
+    done(null, user);
+  });
 
-// Middleware para verificar autenticación
-function ensureAuthenticated(req: Request, res: Response, next: NextFunction): void {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/');
+  passport.deserializeUser((user: Express.User, done) => {
+    done(null, user);
+  });
+
+  app.use(passport.initialize());
+  app.use(passport.session());
 }
 
-// Rutas
-app.get('/', (req: Request, res: Response) => {
-  if (req.isAuthenticated()) {
-    return res.redirect('/dashboard');
-  }
-  res.render('login');
-});
+// URL del frontend (React/Vite)
+const CLIENT_URL = 'http://localhost:5173/adient/#';
 
-// Ruta para iniciar login SAML
-app.get('/login',
-  passport.authenticate('saml', { failureRedirect: '/', failureFlash: true })
-);
+if (SKIP_SAML) {
+  // ── Modo desarrollo: usuario mock, sin SAML ──
 
-// Callback de SAML (donde el IdP envía la respuesta)
-// Soportar tanto POST como GET
-app.post('/login/callback',
-  passport.authenticate('saml', { failureRedirect: '/', failureFlash: true }),
-  (req: Request, res: Response) => {
-    res.redirect('/dashboard');
-  }
-);
+  const mockUser: SamlUser = {
+    id: 'dev-user-001',
+    email: 'dev@adient.com',
+    displayName: 'Usuario de Desarrollo',
+    firstName: 'Dev',
+    lastName: 'Adient'
+  };
 
-app.get('/login/callback',
-  passport.authenticate('saml', { failureRedirect: '/', failureFlash: true }),
-  (req: Request, res: Response) => {
-    res.redirect('/dashboard');
-  }
-);
+  // Login simulado: crea sesión con usuario mock
+  app.get('/login', (req: Request, res: Response) => {
+    req.session.user = mockUser;
+    res.redirect(`${CLIENT_URL}/dashboard`);
+  });
 
-// Dashboard protegido
-app.get('/dashboard', ensureAuthenticated, (req: Request, res: Response) => {
-  res.render('dashboard', { user: req.user });
-});
-
-// Logout
-app.get('/logout', (req: Request, res: Response, next: NextFunction) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
+  // API user: devuelve el mock de sesión
+  app.get('/api/user', (req: Request, res: Response) => {
+    if (req.session.user) {
+      return res.json(req.session.user);
     }
-    req.session.destroy((destroyErr) => {
-      if (destroyErr) {
-        console.error('Error al destruir sesión:', destroyErr);
-      }
-      res.redirect('/');
+    res.status(401).json({ error: 'No autenticado' });
+  });
+
+  // Logout
+  app.get('/logout', (req: Request, res: Response) => {
+    req.session.destroy(() => {
+      res.redirect(CLIENT_URL);
     });
   });
-});
 
-// Metadata de la aplicación (útil para configurar en Workday)
-app.get('/metadata', (req: Request, res: Response) => {
-  res.type('application/xml');
-  // Pasar null para los certificados si no los tienes configurados aún
-  const metadata = samlStrategy.generateServiceProviderMetadata(null, null);
-  res.send(metadata);
-});
+} else {
+  // ── Modo producción: SAML real ──
+
+  // Middleware para verificar autenticación (API)
+  function ensureAuthenticated(req: Request, res: Response, next: NextFunction): void {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.status(401).json({ error: 'No autenticado' });
+  }
+
+  // Endpoint para obtener datos del usuario autenticado
+  app.get('/api/user', ensureAuthenticated, (req: Request, res: Response) => {
+    res.json(req.user);
+  });
+
+  // Ruta para iniciar login SAML
+  app.get('/login',
+    passport.authenticate('saml', { failureRedirect: `${CLIENT_URL}/?error=auth_failed` })
+  );
+
+  // Callback de SAML (donde el IdP envía la respuesta)
+  app.post('/login/callback',
+    passport.authenticate('saml', { failureRedirect: `${CLIENT_URL}/?error=auth_failed` }),
+    (req: Request, res: Response) => {
+      res.redirect(`${CLIENT_URL}/dashboard`);
+    }
+  );
+
+  app.get('/login/callback',
+    passport.authenticate('saml', { failureRedirect: `${CLIENT_URL}/?error=auth_failed` }),
+    (req: Request, res: Response) => {
+      res.redirect(`${CLIENT_URL}/dashboard`);
+    }
+  );
+
+  // Logout
+  app.get('/logout', (req: Request, res: Response, next: NextFunction) => {
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+      req.session.destroy((destroyErr) => {
+        if (destroyErr) {
+          console.error('Error al destruir sesión:', destroyErr);
+        }
+        res.redirect(CLIENT_URL);
+      });
+    });
+  });
+
+  // Metadata de la aplicación (útil para configurar en Workday)
+  app.get('/metadata', (req: Request, res: Response) => {
+    res.type('application/xml');
+    const metadata = samlStrategy.generateServiceProviderMetadata(null, null);
+    res.send(metadata);
+  });
+}
 
 // Iniciar servidor
 app.listen(PORT, () => {
