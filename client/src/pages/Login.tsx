@@ -15,12 +15,11 @@ function Login() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-logo">
-          {/* Reemplaza este placeholder con el logo de Adient */}
           <img src={`${import.meta.env.BASE_URL}logo-adient.png`} alt="ADIENT" className="logo-img" />
         </div>
 
         <h1 className="login-title">Iniciar Sesión</h1>
-        <p className="login-subtitle">Accede a tu cuenta de empleado ADIENT</p>
+        <p className="login-subtitle">Accede con tu cuenta de Workday</p>
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
@@ -36,7 +35,6 @@ function Login() {
               className="login-input"
             />
           </div>
-          <a href="#" className="forgot-link">¿Olvidaste tu nombre de usuario?</a>
 
           <div className="input-group">
             <span className="input-icon">
@@ -71,14 +69,9 @@ function Login() {
               )}
             </button>
           </div>
-          <a href="#" className="forgot-link">¿Olvidaste tu contraseña?</a>
 
           <button type="submit" className="login-btn">Entrar</button>
         </form>
-
-        <p className="login-legal">
-          Al iniciar sesión, aceptas nuestros <a href="#">Términos de Servicio</a> y la <a href="#">Política de Protección de Datos</a>
-        </p>
       </div>
     </div>
   );
