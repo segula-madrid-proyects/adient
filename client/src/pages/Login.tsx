@@ -1,17 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
 function Login() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = `${API_URL}/login`;
+    navigate("/home");
   };
 
   return (
@@ -152,9 +152,7 @@ function Login() {
               type="button"
               variant="outline"
               className="w-full h-11 border-[#e0ddd5] bg-white hover:bg-[#f5f4f0] text-[#2c3e2d] text-sm font-medium"
-              onClick={() => {
-                window.location.href = `${API_URL}/login`;
-              }}
+              onClick={() => navigate("/home")}
             >
               <img
                 src={`${import.meta.env.BASE_URL}logo-workday.png`}

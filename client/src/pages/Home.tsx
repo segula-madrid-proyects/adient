@@ -23,6 +23,9 @@ import {
   Send,
   Calendar,
   ChevronRight,
+  Menu,
+  X,
+  LogOut,
 } from "lucide-react";
 import SessionTimer from "../components/SessionTimer";
 import {
@@ -41,7 +44,6 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { Input } from "../components/ui/input";
 import { Separator } from "../components/ui/separator";
 
@@ -55,12 +57,12 @@ const mockUser = {
 };
 
 const navLinks = [
-  { label: "Home", href: "#" },
-  { label: "Horario", href: "#" },
-  { label: "Nómina", href: "#" },
-  { label: "Contrato", href: "#" },
-  { label: "Vacaciones", href: "#" },
-  { label: "Manuales", href: "#" },
+  { label: "Home", href: "/home" },
+  { label: "Horario", href: "/horario" },
+  { label: "Nómina", href: "/nomina" },
+  { label: "Contrato", href: "/contrato" },
+  { label: "Vacaciones", href: "/vacaciones" },
+  { label: "Manuales", href: "/manuales" },
 ];
 
 const newsSlides = [
@@ -187,71 +189,122 @@ function Home() {
   const navigate = useNavigate();
   const user = mockUser;
   const [activeNavIndex, setActiveNavIndex] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     navigate("/");
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f0] overflow-y-auto">
+    <div className="min-h-screen bg-[#f5f5f0] overflow-x-clip">
       {/* ── Navbar ── */}
-      <nav className="flex items-center justify-between bg-white px-8 h-15 shadow-[0_1px_4px_rgba(0,0,0,0.06)] sticky top-0 z-100">
-        <div className="flex items-center gap-8">
-          <img
-            src={`${import.meta.env.BASE_URL}logo-adient.png`}
-            alt="ADIENT"
-            className="h-8 object-contain"
-          />
-          <NavigationMenu>
-            <NavigationMenuList className="gap-1">
+      <nav className="bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06)] sticky top-0 z-50">
+        <div className="flex items-center justify-between px-4 sm:px-8 h-15">
+          {/* Logo + links desktop */}
+          <div className="flex items-center gap-8">
+            <img
+              src={`${import.meta.env.BASE_URL}logo-adient.png`}
+              alt="ADIENT"
+              className="h-8 object-contain shrink-0"
+            />
+            <NavigationMenu className="hidden lg:flex">
+              <NavigationMenuList className="gap-1">
+                {navLinks.map((link, i) => (
+                  <NavigationMenuItem key={link.label}>
+                    <NavigationMenuLink
+                      href={link.href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setActiveNavIndex(i);
+                        navigate(link.href);
+                      }}
+                      className={`text-[0.9rem] font-medium px-3.5 py-2 transition-colors rounded-md ${
+                        i === activeNavIndex
+                          ? "text-[#2c3e2d] font-bold border-b-2 border-b-[#2c3e2d] rounded-none"
+                          : "text-[#5a5a5a] hover:bg-[#f0ede5] hover:text-[#2c3e2d]"
+                      }`}
+                    >
+                      {link.label}
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+
+          {/* Acciones derecha */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden sm:flex items-center gap-2 bg-[#f5f5f0] rounded-lg px-3.5 py-2 text-[#9a9a8e]">
+              <Search size={16} />
+              <Input
+                type="text"
+                placeholder="Buscar..."
+                className="border-none outline-none bg-transparent text-[0.85rem] text-[#2c3e2d] w-30 placeholder:text-[#aaa89e] shadow-none p-0 h-auto focus-visible:ring-0"
+              />
+            </div>
+            <SessionTimer />
+            <button
+              className="hidden sm:flex bg-transparent border-none cursor-pointer text-[#5a5a5a] p-1.5 rounded-full transition-colors hover:bg-[#f0ede5]"
+              aria-label="Ayuda"
+            >
+              <HelpCircle size={20} />
+            </button>
+            <button
+              onClick={handleLogout}
+              title="Cerrar sesión"
+              className="flex items-center justify-center w-9 h-9 rounded-full text-[#5a5a5a] hover:bg-[#f0ede5] hover:text-[#c0392b] transition-colors"
+              aria-label="Cerrar sesión"
+            >
+              <LogOut size={20} />
+            </button>
+            {/* Hamburguesa mobile */}
+            <button
+              className="lg:hidden flex items-center justify-center p-1.5 rounded-md text-[#5a5a5a] hover:bg-[#f0ede5] transition-colors"
+              aria-label="Menú"
+              onClick={() => setMobileMenuOpen((o) => !o)}
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Menú mobile desplegable */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-[#eeeee8] bg-white px-4 pb-4">
+            {/* Búsqueda mobile */}
+            <div className="flex items-center gap-2 bg-[#f5f5f0] rounded-lg px-3.5 py-2 mt-3 text-[#9a9a8e]">
+              <Search size={16} />
+              <Input
+                type="text"
+                placeholder="Buscar..."
+                className="border-none outline-none bg-transparent text-[0.85rem] text-[#2c3e2d] w-full placeholder:text-[#aaa89e] shadow-none p-0 h-auto focus-visible:ring-0"
+              />
+            </div>
+            {/* Links */}
+            <ul className="mt-2 flex flex-col">
               {navLinks.map((link, i) => (
-                <NavigationMenuItem key={link.label}>
-                  <NavigationMenuLink
+                <li key={link.label}>
+                  <a
                     href={link.href}
                     onClick={(e) => {
                       e.preventDefault();
                       setActiveNavIndex(i);
+                      setMobileMenuOpen(false);
+                      navigate(link.href);
                     }}
-                    className={`text-[0.9rem] font-medium px-3.5 py-2 transition-colors rounded-md ${
+                    className={`block px-3 py-2.5 text-[0.9rem] font-medium rounded-md transition-colors ${
                       i === activeNavIndex
-                        ? "text-[#2c3e2d] font-bold border-b-2 border-b-[#2c3e2d] rounded-none"
+                        ? "text-[#2c3e2d] font-bold bg-[#f0ede5]"
                         : "text-[#5a5a5a] hover:bg-[#f0ede5] hover:text-[#2c3e2d]"
                     }`}
                   >
                     {link.label}
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
+                  </a>
+                </li>
               ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-[#f5f5f0] rounded-lg px-3.5 py-2 text-[#9a9a8e]">
-            <Search size={16} />
-            <Input
-              type="text"
-              placeholder="Buscar..."
-              className="border-none outline-none bg-transparent text-[0.85rem] text-[#2c3e2d] w-30 placeholder:text-[#aaa89e] shadow-none p-0 h-auto focus-visible:ring-0"
-            />
+            </ul>
           </div>
-          <SessionTimer />
-          <button
-            className="bg-transparent border-none cursor-pointer text-[#5a5a5a] flex p-1.5 rounded-full transition-colors hover:bg-[#f0ede5]"
-            aria-label="Ayuda"
-          >
-            <HelpCircle size={20} />
-          </button>
-          <Avatar
-            className="w-9 h-9 bg-[#1a3a4a] cursor-pointer hover:opacity-85 transition-opacity"
-            onClick={handleLogout}
-            title="Cerrar sesión"
-          >
-            <AvatarFallback className="bg-[#1a3a4a] text-white text-[0.8rem] font-bold">
-              {user.initials}
-            </AvatarFallback>
-          </Avatar>
-        </div>
+        )}
       </nav>
 
       {/* ── Main content ── */}
