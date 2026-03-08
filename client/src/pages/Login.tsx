@@ -20,7 +20,7 @@ function Login() {
       <div className="hidden lg:flex lg:w-1/2 bg-[#1a3a4a] flex-col justify-between p-12 relative overflow-hidden">
         {/* Círculos decorativos */}
         <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5" />
-        <div className="absolute -bottom-32 -right-16 w-[480px] h-[480px] rounded-full bg-[#8b9a3a]/20" />
+        <div className="absolute -bottom-32 -right-16 w-120 h-120 rounded-full bg-[#8b9a3a]/20" />
         <div className="absolute top-1/2 -right-12 w-48 h-48 rounded-full bg-white/5" />
 
         {/* Logo */}
