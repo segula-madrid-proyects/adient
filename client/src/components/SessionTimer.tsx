@@ -36,8 +36,8 @@ function SessionTimer() {
   const seconds = timeLeft % 60;
 
   return (
-    <div className="session-timer">
-      Tiempo restante de sesión: <span id="countdown">{minutes}:{seconds.toString().padStart(2, '0')}</span>
+    <div className="text-center text-[0.8rem] text-[#9a9a8e] p-2">
+      Tiempo restante de sesión: <span className="font-bold text-[#1a3a4a] text-[0.85rem]">{minutes}:{seconds.toString().padStart(2, '0')}</span>
     </div>
   );
 }
