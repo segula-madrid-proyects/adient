@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
@@ -11,117 +15,156 @@ function Login() {
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-[#f0ede5]">
-      <div className="bg-[#faf9f6] px-14 py-12 rounded-2xl text-center max-w-120 w-[90%] shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
-        <div className="mb-8">
+    <div className="fixed inset-0 flex">
+      {/* ── Panel izquierdo — marca ── */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#1a3a4a] flex-col justify-between p-12 relative overflow-hidden">
+        {/* Círculos decorativos */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5" />
+        <div className="absolute -bottom-32 -right-16 w-[480px] h-[480px] rounded-full bg-[#8b9a3a]/20" />
+        <div className="absolute top-1/2 -right-12 w-48 h-48 rounded-full bg-white/5" />
+
+        {/* Logo */}
+        <div className="relative z-10">
           <img
             src={`${import.meta.env.BASE_URL}logo-adient.png`}
             alt="ADIENT"
-            className="max-h-16 object-contain"
+            className="h-10 object-contain brightness-0 invert"
           />
         </div>
 
-        <h1 className="text-[2rem] font-bold text-[#2c3e2d] m-0 mb-2">
-          Iniciar Sesión
-        </h1>
-        <p className="text-base text-[#7a7a6e] m-0 mb-9">
-          Accede con tu cuenta de Workday
-        </p>
+        {/* Texto central */}
+        <div className="relative z-10 space-y-4">
+          <h1 className="text-4xl font-bold text-white leading-tight">
+            Tu portal de
+            <br />
+            empleado,
+            <br />
+            <span className="text-[#a8bb5a]">todo en uno.</span>
+          </h1>
+          <p className="text-white/60 text-base leading-relaxed max-w-xs">
+            Accede a tu nómina, horario, vacaciones y recursos corporativos
+            desde un solo lugar.
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col items-stretch">
-          <div className="flex items-center border-b border-b-[#c8c4b8] py-3 mt-3 gap-3 focus-within:border-b-[#8b9a3a]">
-            <span className="text-[#9a9a8e] flex shrink-0">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </span>
-            <input
-              type="text"
-              placeholder="Nombre de usuario o correo corporativo"
-              className="flex-1 border-none outline-none text-base text-[#2c3e2d] bg-transparent py-1 placeholder:text-[#aaa89e]"
-            />
+        {/* Footer izquierdo */}
+        <div className="relative z-10">
+          <p className="text-white/30 text-sm">
+            © 2026 Adient. Todos los derechos reservados.
+          </p>
+        </div>
+      </div>
+
+      {/* ── Panel derecho — formulario ── */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center bg-[#f5f4f0] px-8">
+        {/* Logo visible solo en móvil */}
+        <div className="lg:hidden mb-10">
+          <img
+            src={`${import.meta.env.BASE_URL}logo-adient.png`}
+            alt="ADIENT"
+            className="h-10 object-contain"
+          />
+        </div>
+
+        <div className="w-full max-w-sm space-y-8">
+          {/* Encabezado */}
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold text-[#1a1a1a] tracking-tight">
+              Bienvenido de nuevo
+            </h2>
+            <p className="text-sm text-[#7a7a6e]">
+              Inicia sesión con tu cuenta corporativa de Workday
+            </p>
           </div>
 
-          <div className="flex items-center border-b border-b-[#c8c4b8] py-3 mt-3 gap-3 focus-within:border-b-[#8b9a3a]">
-            <span className="text-[#9a9a8e] flex shrink-0">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          {/* Formulario */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="username"
+                className="text-[#2c3e2d] text-sm font-medium"
               >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </span>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Contraseña"
-              className="flex-1 border-none outline-none text-base text-[#2c3e2d] bg-transparent py-1 placeholder:text-[#aaa89e]"
-            />
-            <button
-              type="button"
-              className="bg-transparent border-none cursor-pointer text-[#9a9a8e] flex p-0 shrink-0 hover:text-[#5a5a4e]"
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={
-                showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
-              }
+                Usuario
+              </Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="correo@empresa.com"
+                className="h-11 bg-white border-[#e0ddd5] text-[#1a1a1a] placeholder:text-[#b0ae9e] focus-visible:ring-[#8b9a3a]/40 focus-visible:border-[#8b9a3a]"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="password"
+                  className="text-[#2c3e2d] text-sm font-medium"
+                >
+                  Contraseña
+                </Label>
+                <a
+                  href="#"
+                  className="text-xs text-[#8b9a3a] hover:text-[#6d7a2a] font-medium transition-colors"
+                >
+                  ¿La olvidaste?
+                </a>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="h-11 bg-white border-[#e0ddd5] text-[#1a1a1a] placeholder:text-[#b0ae9e] focus-visible:ring-[#8b9a3a]/40 focus-visible:border-[#8b9a3a] pr-10"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9a9a8e] hover:text-[#5a5a4e] transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-11 bg-[#2c3e2d] hover:bg-[#1e2e1f] text-white font-medium text-sm transition-colors mt-2 group"
             >
-              {showPassword ? (
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              ) : (
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                  <line x1="1" y1="1" x2="23" y2="23" />
-                  <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-                </svg>
-              )}
-            </button>
-          </div>
+              Iniciar sesión
+              <ArrowRight
+                size={16}
+                className="ml-2 transition-transform group-hover:translate-x-0.5"
+              />
+            </Button>
+          </form>
 
-          <button
-            type="submit"
-            className="mt-8 bg-transparent border-none text-[#8b9a3a] text-[1.1rem] font-semibold cursor-pointer py-3 transition-colors hover:text-[#6d7a2a]"
-          >
-            Entrar
-          </button>
-        </form>
+          {/* Divider + SSO */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-[#e0ddd5]" />
+              <span className="text-xs text-[#9a9a8e]">o continúa con</span>
+              <div className="h-px flex-1 bg-[#e0ddd5]" />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 border-[#e0ddd5] bg-white hover:bg-[#f5f4f0] text-[#2c3e2d] text-sm font-medium"
+              onClick={() => {
+                window.location.href = `${API_URL}/login`;
+              }}
+            >
+              <img
+                src={`${import.meta.env.BASE_URL}logo-workday.png`}
+                alt="Workday"
+                className="w-6 h-6 mr-0"
+              />
+              Workday SSO
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
